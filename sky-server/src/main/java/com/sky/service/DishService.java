@@ -42,4 +42,13 @@ public interface DishService {
      * @return
      */
     void updateWithFlavor(DishDTO dishDTO);
+
+    /**
+     * 起售或停售菜品
+     *
+     * @param status
+     * @param id
+     * @return
+     */
+    void startOrStop(Integer status, Long id);
 }
