@@ -43,6 +43,7 @@ sky:
     user-secret-key: yyw
     user-ttl: 7200000
     user-token-name: authentication
+
   wechat:
     appid: ${sky.wechat.appid}
     secret: ${sky.wechat.secret}
@@ -59,4 +60,6 @@ sky:
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
     endpoint: ${sky.alioss.endpoint}
-
+  baidu:
+    AK: ${sky.baidu.AK}
+    shop-address: 湖北省襄阳市襄城区湖北文理学院北区15栋

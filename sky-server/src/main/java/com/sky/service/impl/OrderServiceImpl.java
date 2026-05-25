@@ -12,6 +12,7 @@ import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
 import com.sky.service.AddressBookService;
 import com.sky.service.OrderService;
+import com.sky.utils.LocationUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
@@ -46,6 +47,11 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private WeChatPayUtil weChatPayUtil;
 
+    @Autowired
+    private LocationUtil locationUtil;
+
+    private static final double MAX_DISTANCE = 5;
+
     /**
      * 提交订单
      *
@@ -56,14 +62,21 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO) {
         //处理异常情况
+        //地址不能为空
         AddressBook addressBook = addressBookMapper.getById(ordersSubmitDTO.getAddressBookId());
         if (addressBook == null) throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
 
+        //购物车不能为空
         ShoppingCart shoppingCart = new ShoppingCart();
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
         if (list.isEmpty()) throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+
+        //订单距离不能超过限制
+        String address = addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail();
+        double dis = locationUtil.getDistance(address);
+        if (dis >= MAX_DISTANCE) throw new AddressBookBusinessException(MessageConstant.DISTANCE_TOO_FAR);
 
         //向订单表中插入数据
         Orders orders = new Orders();
