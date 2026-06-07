@@ -1,6 +1,5 @@
 package com.sky.controller.user;
 
-import com.sky.dto.OrdersCancelDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -98,6 +97,18 @@ public class OrderController {
     @ApiOperation("再来一单")
     public Result repetition(@PathVariable Long id) {
         orderService.repetition(id);
+        return Result.success();
+    }
+
+    /**
+     * 用户催单
+     * @param id
+     * @return
+     */
+    @GetMapping("reminder/{id}")
+    @ApiOperation("用户催单")
+    public Result<Void> reminder(@PathVariable Long id) {
+        orderService.reminder(id);
         return Result.success();
     }
 }

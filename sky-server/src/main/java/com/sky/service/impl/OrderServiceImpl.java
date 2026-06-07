@@ -16,6 +16,7 @@ import com.sky.service.OrderService;
 import com.sky.utils.LocationUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.*;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,9 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +51,8 @@ public class OrderServiceImpl implements OrderService {
     private WeChatPayUtil weChatPayUtil;
     @Autowired
     private LocationUtil locationUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     /**
      * 提交订单
@@ -162,6 +167,14 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        Map map = new HashMap<>();
+
+        map.put("type",1);
+        map.put("orderId",ordersDB.getId());
+        map.put("contnet","订单号" + outTradeNo);
+
+        webSocketServer.sendToAllClient(JSONObject.toJSONString(map));
     }
 
     /**
@@ -439,6 +452,23 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 用户催单
+     * @param id
+     * @return
+     */
+    @Override
+    public void reminder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        Map map = new HashMap<>();
+        map.put("type",2);
+        map.put("orderId",id);
+        map.put("content","订单号为"+orders.getNumber()+"的用户催单了");
+
+        webSocketServer.sendToAllClient(JSONObject.toJSONString(map));
+
     }
 
     private List<OrderVO> getOrderVOList(Page<Orders> page) {
